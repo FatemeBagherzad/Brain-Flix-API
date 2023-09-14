@@ -10,7 +10,7 @@ const videosDetailed = JSON.parse(
 );
 
 exports.checkID = (req, res, next, val) => {
-  console.log(`Video id is: ${val}`);
+  console.log(`req.params.id is:  ${val}`);
   const video = videosDetailed.find((video) => video.id === val);
   if (!video) {
     return res.status(404).json({
@@ -67,7 +67,7 @@ exports.postComment = (req, res) => {
   const video = videosDetailed.find((el) => el.id === videoId);
   video.comments.push(newComment);
   fs.writeFile(
-    `${__dirname}/dev-data/data/video-details.json`,
+    `${__dirname}/../dev-data/data/video-details.json`,
     JSON.stringify(videosDetailed),
     (err) => {
       res.status(201).json(video);
@@ -81,9 +81,9 @@ exports.editAndLikeComment = (req, res) => {
   const comment = video.comments.find((c) => c.id === req.body.data.id);
   Object.assign(comment, req.body.data);
   fs.writeFile(
-    `${__dirname}/dev-data/data/video-details.json`,
+    `${__dirname}/../dev-data/data/video-details.json`,
     JSON.stringify(videosDetailed),
-    () => {
+    (err) => {
       res.status(201).json(video);
     }
   );
@@ -98,7 +98,7 @@ exports.deleteComment = (req, res) => {
   console.log(commentIndex);
   video.comments.splice(commentIndex, 1);
   fs.writeFile(
-    `${__dirname}/dev-data/data/video-details.json`,
+    `${__dirname}/../dev-data/data/video-details.json`,
     JSON.stringify(videosDetailed),
     (err) => {
       res.status(201).json(video);
