@@ -1,5 +1,6 @@
 const fs = require('fs');
 const uniqid = require('uniqid');
+const path = require('path');
 
 // const videosSimplified = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/videos.json`)
@@ -22,6 +23,7 @@ exports.checkID = (req, res, next, val) => {
 };
 
 exports.checkBody = (req, res, next) => {
+  console.log(req.body);
   if (!req.body.title || !req.body.description) {
     return res.status(400).json({
       status: 'fail',
@@ -43,19 +45,27 @@ exports.getVideo = (req, res) => {
 };
 
 exports.createVideo = (req, res) => {
+  console.log(req.file);
   const newId = uniqid();
-  const newVideo = Object.assign({ id: newId }, req.body);
-  videosDetailed.push(newVideo);
+  const uploadVideo = {
+    id: newId,
+    title: req.body.title,
+    channel: req.body.channel,
+    image: `http://localhost:8888/${req.file.filename}`,
+    description: req.body.description,
+    views: 0,
+    likes: 0,
+    duration: '4:20',
+    videoUrl: 'https://project-2-api.herokuapp.com/stream',
+    timestamp: 0,
+    comments: [],
+  };
+  videosDetailed.push(uploadVideo);
   fs.writeFile(
-    `${__dirname}/dev-data/data/video-details.json`,
+    `${__dirname}/../dev-data/data/video-details.json`,
     JSON.stringify(videosDetailed),
     (err) => {
-      res.status(201).json({
-        status: 'success',
-        data: {
-          video: newVideo,
-        },
-      });
+      res.status(201).json(uploadVideo);
     }
   );
 };
