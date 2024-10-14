@@ -45,29 +45,46 @@ exports.getVideo = (req, res) => {
 };
 
 exports.createVideo = (req, res) => {
-  console.log(req.file);
-  const newId = uniqid();
-  const uploadVideo = {
-    id: newId,
-    title: req.body.title,
-    channel: req.body.channel,
-    image: `http://localhost:8888/${req.file.filename}`,
-    description: req.body.description,
-    views: 0,
-    likes: 0,
-    duration: '4:20',
-    videoUrl: 'https://project-2-api.herokuapp.com/stream',
-    timestamp: 0,
-    comments: [],
-  };
-  videosDetailed.push(uploadVideo);
-  fs.writeFile(
-    `${__dirname}/../dev-data/data/video-details.json`,
-    JSON.stringify(videosDetailed),
-    (err) => {
-      res.status(201).json(uploadVideo);
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Video file is required.' });
     }
-  );
+
+    const newId = uniqid();
+    const uploadVideo = {
+      id: newId,
+      title: req.body.title || 'Untitled Video',
+      channel: req.body.channel || 'Unknown Channel',
+      image: `http://localhost:8888/${req.file.filename}`,
+      description: req.body.description || 'No description provided',
+      views: 0,
+      likes: 0,
+      duration: '4:20', // Placeholder, should be dynamic in real-world apps.
+      videoUrl: 'https://project-2-api.herokuapp.com/stream',
+      timestamp: Date.now(),
+      comments: [],
+    };
+
+    videosDetailed.push(uploadVideo);
+
+    const dataPath = path.join(
+      __dirname,
+      '../dev-data/data/video-details.json'
+    );
+    fs.writeFile(dataPath, JSON.stringify(videosDetailed, null, 2), (err) => {
+      if (err) {
+        console.error('Error saving video details:', err);
+        return res.status(500).json({ error: 'Internal server error.' });
+      }
+
+      res
+        .status(201)
+        .json({ message: 'Video created successfully.', data: uploadVideo });
+    });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    res.status(500).json({ error: 'Something went wrong.' });
+  }
 };
 
 exports.postComment = (req, res) => {
